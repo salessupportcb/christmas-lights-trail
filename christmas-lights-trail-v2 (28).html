@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cairns & Beaches Christmas Lights Trail 2026 | Ray White Cairns Beaches</title>
+  <meta name="description" content="Join the Cairns & Beaches Christmas Lights Trail this December. Vote for your favourite displays, explore the interactive map, and celebrate the best Christmas lights in Cairns. Free to enter, free to visit.">
+  <meta property="og:title" content="Cairns & Beaches Christmas Lights Trail 2026">
+  <meta property="og:description" content="Explore the trail, vote for your favourite Christmas light displays across Cairns. 1-24 December 2026.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_AU">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Cairns & Beaches Christmas Lights Trail",
+    "description": "Community Christmas lights competition across the Cairns region. Vote for your favourite displays.",
+    "startDate": "2026-12-01",
+    "endDate": "2026-12-24",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+    "location": {
+      "@type": "Place",
+      "name": "Cairns Region",
+      "address": { "@type": "PostalAddress", "addressLocality": "Cairns", "addressRegion": "QLD", "addressCountry": "AU" }
+    },
+    "organizer": { "@type": "Organization", "name": "Ray White Cairns Beaches", "url": "https://raywhitecairnsbeaches.com.au/" },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD", "availability": "https://schema.org/InStock" }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700&family=Dancing+Script:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --yellow: #FFD700;
+      --yellow-dark: #E6C200;
+      --gold: #D4A017;
+      --navy: #0A1628;
+      --navy-card: #0D2137;
+      --navy-light: #132035;
+      --navy-dark: #060d18;
+      --white: #ffffff;
+      --cream: #FAF8F5;
+      --cream-dark: #E8E4DC;
+      --text-dark: #1A2332;
+      --text-muted: #4A5568;
+      --text-gray: #666666;
+      --text-light-muted: #8B9BB4;
+      --gray-light: #E0E0E0;
+      --green: #27AE60;
+      --radius: 8px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.06);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-dark);
+      background: var(--white);
+      line-height: 1.6;
+    }
+    h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; }
+    .script-font { font-family: 'Dancing Script', cursive; }
+
+    /* ── Navigation ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: transparent;
+      padding: 0 40px;
+      transition: background 0.3s;
+    }
+    .nav.scrolled {
+      background: rgba(10,22,40,0.95); backdrop-filter: blur(16px);
+    }
+    .nav-inner {
+      max-width: 1400px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 72px;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-location {
+      font-size: 0.85rem; color: var(--white); font-weight: 500;
+    }
+    .nav-links { display: flex; gap: 32px; list-style: none; align-items: center; }
+    .nav-links a {
+      color: var(--white); text-decoration: none; font-size: 0.85rem;
+      font-weight: 500; padding: 4px 0; position: relative;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--yellow); }
+    .nav-links a.active {
+      color: var(--white);
+      border-bottom: 2px solid var(--yellow);
+      padding-bottom: 4px;
+    }
+    .nav-toggle { display: none; background: none; border: none; color: var(--white); font-size: 1.5rem; cursor: pointer; }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+    }
+    .hero-bg img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(to right, rgba(10,22,40,0.65) 0%, rgba(10,22,40,0.3) 55%, transparent 100%);
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      max-width: 1400px; margin: 0 auto; width: 100%;
+      padding: 100px 40px 80px;
+    }
+    .hero-eyebrow {
+      font-size: 0.85rem; font-weight: 500; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--white); margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 7vw, 4.8rem); font-weight: 500;
+      line-height: 1.08; margin-bottom: 18px;
+      letter-spacing: 0.01em; text-transform: uppercase;
+    }
+    .hero h1 .line-white { color: var(--white); display: block; }
+    .hero h1 .line-yellow { color: var(--yellow); display: block; }
+    .hero-script {
+      font-family: 'Dancing Script', cursive; font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+      color: var(--white); margin-bottom: 36px; font-weight: 500;
+      opacity: 0.9; line-height: 1.5;
+    }
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 44px; }
+    .btn-yellow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--yellow); color: var(--navy); font-weight: 700;
+      padding: 14px 28px; border-radius: 50px; text-decoration: none;
+      font-size: 0.8rem; letter-spacing: 0.05em; text-transform: uppercase;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none; cursor: pointer; font-family: 'Montserrat', sans-serif;
+    }
+    .btn-yellow:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(255,215,0,0.4); }
+    .btn-outline-white {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--white); font-weight: 600;
+      padding: 14px 28px; border-radius: 50px; text-decoration: none;
+      font-size: 0.8rem; letter-spacing: 0.05em; text-transform: uppercase;
+      border: 1.5px solid rgba(255,255,255,0.6);
+      transition: border-color 0.2s, background 0.2s; font-family: 'Montserrat', sans-serif;
+    }
+    .btn-outline-white:hover { border-color: var(--white); background: rgba(255,255,255,0.1); }
+    .hero-sponsor {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.8rem; color: rgba(255,255,255,0.6);
+    }
+    .hero-sponsor strong { color: var(--white); font-weight: 500; }
+
+    /* ── Countdown Section ── */
+    .countdown-section {
+      background: var(--cream); padding: 56px 40px;
+      border-bottom: 1px solid var(--gray-light);
+      position: relative; overflow: hidden;
+    }
+    .countdown-inner {
+      max-width: 1400px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1px 1fr auto; gap: 48px; align-items: center;
+    }
+    .countdown-left { display: flex; align-items: flex-start; gap: 20px; }
+    .countdown-palm {
+      font-size: 1.8rem; margin-top: 4px;
+      filter: hue-rotate(40deg) saturate(2);
+    }
+    .countdown-heading {
+      font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 500;
+      color: var(--navy); margin-bottom: 18px;
+    }
+    .countdown-grid {
+      display: flex; gap: 0;
+    }
+    .countdown-unit {
+      text-align: center; padding: 0 20px;
+      border-right: 1px solid var(--gray-light);
+    }
+    .countdown-unit:first-child { padding-left: 0; }
+    .countdown-unit:last-child { border-right: none; }
+    .countdown-num {
+      font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 700;
+      color: var(--navy); line-height: 1;
+    }
+    .countdown-label {
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--text-gray); margin-top: 8px;
+    }
+    .countdown-divider {
+      width: 1px; height: 80px; background: var(--gray-light);
+    }
+    .countdown-right-text h3 {
+      font-size: 0.95rem; color: var(--navy); margin-bottom: 6px;
+      font-family: 'Playfair Display', serif; font-weight: 600;
+    }
+    .countdown-right-text p {
+      font-size: 0.85rem; color: var(--text-muted); line-height: 1.7;
+    }
+    .countdown-decoration {
+      position: absolute; right: -20px; top: 50%; transform: translateY(-50%);
+      font-size: 5rem; opacity: 0.35; pointer-events: none;
+    }
+
+    /* ── Map Section ── */
+    .map-section { background: var(--white); padding: 64px 40px; }
+    .map-section-inner { max-width: 1400px; margin: 0 auto; }
+    .map-layout {
+      display: grid; grid-template-columns: 240px 1fr 300px; gap: 40px;
+    }
+    .map-info {
+      padding-top: 8px;
+    }
+    .map-info .eyebrow {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--text-gray); margin-bottom: 8px;
+    }
+    .map-info h2 {
+      font-size: 2.2rem; color: var(--navy); margin-bottom: 16px; font-weight: 700;
+    }
+    .map-info p {
+      font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px;
+    }
+    .btn-outline-dark {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: transparent; color: var(--navy); font-weight: 600;
+      padding: 10px 22px; border-radius: 6px; text-decoration: none;
+      font-size: 0.8rem; letter-spacing: 0.03em; text-transform: uppercase;
+      border: 1.5px solid var(--navy);
+      transition: background 0.2s, color 0.2s; font-family: 'Montserrat', sans-serif;
+    }
+    .btn-outline-dark:hover { background: var(--navy); color: var(--white); }
+    .map-container {
+      border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm);
+      min-height: 480px; position: relative; border: 1px solid var(--gray-light);
+    }
+    #trail-map { width: 100%; height: 100%; min-height: 480px; }
+    .map-sidebar {
+      background: var(--white); border-radius: 16px; padding: 24px;
+      display: flex; flex-direction: column; gap: 18px;
+      align-self: start; box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    .search-box {
+      position: relative;
+    }
+    .search-box input {
+      width: 100%; padding: 10px 40px 10px 14px; border-radius: 8px;
+      border: 1px solid var(--gray-light); font-size: 0.85rem; font-family: inherit;
+      background: var(--cream);
+      transition: border-color 0.2s;
+    }
+    .search-box input:focus { outline: none; border-color: var(--yellow); background: var(--white); }
+    .search-box::after {
+      content: ''; position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%); width: 16px; height: 16px; opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-size: contain; background-repeat: no-repeat;
+    }
+    .filter-label {
+      font-size: 0.8rem; font-weight: 600; color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+    .filter-group select {
+      width: 100%; padding: 10px 14px; border-radius: 8px;
+      border: 1px solid var(--gray-light); font-size: 0.85rem; font-family: inherit;
+      background: var(--white); cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%234A5568' stroke-width='2'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+    .filter-group select:focus { outline: none; border-color: var(--yellow); }
+    .checkbox-group { display: flex; flex-direction: column; gap: 10px; }
+    .checkbox-item {
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
+      font-size: 0.85rem; color: var(--text-dark);
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 18px; height: 18px; accent-color: var(--green);
+      cursor: pointer; border-radius: 4px;
+    }
+    .checkbox-count {
+      margin-left: auto; color: var(--text-gray);
+      font-size: 0.8rem; font-weight: 500;
+    }
+    .map-count {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.85rem; color: var(--text-muted);
+    }
+    .btn-navy {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      background: var(--navy); color: var(--white); font-weight: 600;
+      padding: 14px 24px; border-radius: 8px; text-decoration: none;
+      font-size: 0.8rem; letter-spacing: 0.03em; text-transform: uppercase;
+      border: none; cursor: pointer; font-family: 'Montserrat', sans-serif;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    .btn-navy:hover { background: var(--navy-light); }
+
+    /* ── Featured Homes ── */
+    .featured-section {
+      background: var(--navy-card); padding: 56px 40px;
+      border-bottom: 2px solid rgba(255,255,255,0.6);
+    }
+    .featured-inner {
+      max-width: 1400px; margin: 0 auto;
+      display: grid; grid-template-columns: 280px 1fr; gap: 48px; align-items: start;
+    }
+    .featured-header .eyebrow {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--text-light-muted); margin-bottom: 8px;
+    }
+    .featured-header h2 {
+      font-size: 1.8rem; color: var(--white); font-weight: 700; margin-bottom: 14px;
+      font-family: 'Playfair Display', serif;
+    }
+    .featured-header p {
+      font-size: 0.85rem; color: var(--white); line-height: 1.7; margin-bottom: 24px;
+    }
+    .btn-outline-light {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: transparent; color: var(--white); font-weight: 500;
+      padding: 10px 22px; border-radius: 6px; text-decoration: none;
+      font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.4);
+      transition: border-color 0.2s, background 0.2s; font-family: 'Montserrat', sans-serif;
+    }
+    .btn-outline-light:hover { border-color: var(--white); background: rgba(255,255,255,0.08); }
+    .featured-carousel {
+      position: relative;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .featured-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      flex: 1;
+    }
+    .featured-card {
+      background: var(--white); border-radius: 8px; overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .featured-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .featured-card-img {
+      width: 100%; height: 180px; object-fit: cover; display: block;
+    }
+    .featured-tag {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--yellow); color: var(--navy); font-size: 0.6rem;
+      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 3px; z-index: 2;
+    }
+    .featured-card-body { padding: 12px 14px; }
+    .featured-card-suburb {
+      font-family: 'Playfair Display', serif; font-size: 0.9rem; font-weight: 600;
+      color: var(--text-dark); margin-bottom: 6px;
+    }
+    .featured-card-meta {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .featured-card-location {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .featured-card-votes {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .featured-card-votes .star { color: var(--gold); }
+    .carousel-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.6); background: transparent;
+      color: var(--white); font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .carousel-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    /* ── Split Action Banners ── */
+    .split-banners {
+      display: grid; grid-template-columns: 1fr 1fr; min-height: 320px;
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+    }
+    .split-panel {
+      position: relative; display: flex; align-items: center; justify-content: flex-end;
+      overflow: hidden;
+    }
+    .split-panel:first-child {
+      border-right: 2px solid rgba(255,255,255,0.3);
+    }
+    .split-panel-bg {
+      position: absolute; inset: 0;
+    }
+    .split-panel-bg img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .split-panel-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to left, rgba(10,22,40,0.7) 0%, rgba(10,22,40,0.25) 60%, rgba(10,22,40,0.05) 100%);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      mask-image: linear-gradient(to left, black 0%, black 40%, transparent 70%);
+      -webkit-mask-image: linear-gradient(to left, black 0%, black 40%, transparent 70%);
+    }
+    .split-panel-content {
+      position: relative; z-index: 2; padding: 48px; text-align: right;
+      max-width: 400px;
+    }
+    .split-panel-icon {
+      font-size: 1.8rem; margin-bottom: 12px;
+    }
+    .split-panel-content h3 {
+      font-size: 1.4rem; color: var(--white); margin-bottom: 10px; font-weight: 700;
+      font-family: 'Playfair Display', serif;
+    }
+    .split-panel-content p {
+      font-size: 0.8rem; color: rgba(255,255,255,0.85); margin-bottom: 20px;
+      line-height: 1.7;
+    }
+
+    /* ── Tropical Showcase ── */
+    .showcase-section {
+      position: relative; padding: 72px 40px; overflow: hidden;
+    }
+    .showcase-bg {
+      position: absolute; inset: 0;
+    }
+    .showcase-bg img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .showcase-overlay {
+      position: absolute; inset: 0;
+      background: rgba(10,22,40,0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      mask-image: linear-gradient(to right, black 0%, black 50%, transparent 80%);
+      -webkit-mask-image: linear-gradient(to right, black 0%, black 50%, transparent 80%);
+    }
+    .showcase-inner {
+      position: relative; z-index: 2;
+      max-width: 1400px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    }
+    .showcase-left .eyebrow {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+    }
+    .showcase-left h2 {
+      font-size: 2.2rem; color: var(--white); font-weight: 500;
+      margin-bottom: 16px; font-family: 'Playfair Display', serif;
+    }
+    .showcase-left p {
+      font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.8;
+      margin-bottom: 24px; max-width: 440px;
+    }
+    .showcase-features {
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .showcase-feature {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .showcase-feature-icon {
+      font-size: 1.4rem; width: 36px; text-align: center;
+      color: var(--gold);
+    }
+    .showcase-feature-label {
+      font-size: 0.95rem; font-weight: 500; color: var(--white);
+    }
+
+    /* ── FAQ & Policy Section ── */
+    .faq-section { background: var(--white); padding: 56px 40px; }
+    .faq-inner {
+      max-width: 1400px; margin: 0 auto;
+      display: grid; grid-template-columns: 1.2fr 1fr 0.7fr; gap: 48px;
+    }
+    .faq-col-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    }
+    .faq-col-header .icon { font-size: 1.2rem; }
+    .faq-col-header h3 {
+      font-size: 1.1rem; color: var(--navy); font-weight: 600;
+      font-family: 'Playfair Display', serif;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--gray-light);
+    }
+    .faq-question {
+      width: 100%; display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0; background: none; border: none; cursor: pointer;
+      font-family: inherit; text-align: left;
+    }
+    .faq-question h4 {
+      font-size: 0.875rem; color: var(--text-dark); font-weight: 500;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .faq-chevron {
+      color: var(--text-muted); font-size: 0.75rem;
+      transition: transform 0.3s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s;
+    }
+    .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 14px; }
+    .faq-answer p { font-size: 0.825rem; color: var(--text-muted); line-height: 1.7; }
+    .policy-col p {
+      font-size: 0.85rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 14px;
+    }
+    .policy-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      color: var(--navy); font-weight: 600; font-size: 0.8rem;
+      text-decoration: none; transition: color 0.2s;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .policy-link:hover { color: var(--gold); }
+    .community-col {
+      display: flex; flex-direction: row; align-items: center; justify-content: center;
+      gap: 20px;
+    }
+    .community-text-group {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .community-script {
+      font-family: 'Dancing Script', cursive; font-size: 1.3rem;
+      color: var(--gold); line-height: 1.4;
+    }
+    .community-heart { font-size: 1.1rem; color: var(--gold); }
+    .community-logo-block {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .community-logo-text {
+      font-size: 0.75rem; color: var(--text-muted); font-weight: 500;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: var(--navy-dark); padding: 20px 40px;
+    }
+    .footer-inner {
+      max-width: 1400px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-brand { display: flex; align-items: center; gap: 12px; }
+    .footer-brand-text {
+      font-size: 0.8rem; color: var(--text-light-muted);
+    }
+    .footer-links {
+      display: flex; gap: 24px; list-style: none; flex-wrap: wrap;
+    }
+    .footer-links a {
+      color: var(--text-light-muted); text-decoration: none; font-size: 0.8rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--yellow); }
+    .footer-social { display: flex; gap: 12px; }
+    .footer-social a {
+      color: var(--text-light-muted); text-decoration: none;
+      transition: color 0.2s; display: flex; align-items: center;
+    }
+    .footer-social a:hover { color: var(--yellow); }
+    .footer-social svg { width: 18px; height: 18px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .map-layout { grid-template-columns: 1fr; }
+      .featured-inner { grid-template-columns: 1fr; }
+      .featured-grid { grid-template-columns: repeat(2, 1fr); }
+      .showcase-inner { grid-template-columns: 1fr; }
+      .faq-inner { grid-template-columns: 1fr; gap: 40px; }
+      .countdown-inner { grid-template-columns: 1fr; gap: 24px; }
+      .countdown-divider { display: none; }
+      .countdown-decoration { display: none; }
+    }
+    @media (max-width: 768px) {
+      .nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .nav-toggle { display: block; }
+      .nav-links.open {
+        display: flex; flex-direction: column; position: absolute;
+        top: 72px; left: 0; right: 0; background: rgba(10,22,40,0.98);
+        padding: 16px 24px; gap: 4px;
+      }
+      .hero-content { padding: 100px 20px 60px; }
+      .countdown-section { padding: 32px 20px; }
+      .map-section { padding: 48px 20px; }
+      .featured-section { padding: 48px 20px; }
+      .split-banners { grid-template-columns: 1fr; }
+      .showcase-section { padding: 48px 20px; }
+      .faq-section { padding: 48px 20px; }
+      .featured-grid { grid-template-columns: 1fr; }
+      .footer { padding: 20px 20px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .countdown-grid { flex-wrap: wrap; }
+      .countdown-unit { padding: 0 12px; }
+      .countdown-num { font-size: 2rem; }
+      .community-col { flex-direction: column; }
+    }
+    @media (max-width: 480px) {
+      .hero-actions { flex-direction: column; }
+      .btn-yellow, .btn-outline-white { width: 100%; justify-content: center; }
+      .countdown-unit { padding: 0 8px; }
+      .countdown-num { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <img src="b2dd786b5beb80bc-RW_Logo.jpg" alt="Ray White" style="height:56px;width:56px;border-radius:8px;object-fit:cover;">
+      <span class="nav-location">Cairns & Beaches</span>
+    </a>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle menu">☰</button>
+    <ul class="nav-links">
+      <li><a href="#" class="active">Home</a></li>
+      <li><a href="#trail">Explore the Trail</a></li>
+      <li><a href="#vote">Vote</a></li>
+      <li><a href="#register">Register</a></li>
+      <li><a href="#faq">FAQs</a></li>
+      <li><a href="#footer">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="hero-bg">
+    <img src="eaf3fb8d8f1d0ffc-Lead_Picture.png" alt="Tropical cottage decorated with warm Christmas lights at sunset, palm trees, ocean and mountain backdrop">
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Cairns & Beaches</p>
+    <h1>
+      <span class="line-white">Christmas</span>
+      <span class="line-yellow">Lights Trail</span>
+    </h1>
+    <p class="hero-script">Summer nights. Christmas lights.<br>Community spirit.</p>
+    <div class="hero-actions">
+      <a href="#trail" class="btn-yellow">Explore the Trail →</a>
+      <a href="#register" class="btn-outline-white">Register Your Home</a>
+    </div>
+    <div class="hero-sponsor">
+      <span>Proudly brought to you by</span>
+      <img src="b2dd786b5beb80bc-RW_Logo.jpg" alt="Ray White" style="height:56px;width:56px;border-radius:8px;object-fit:cover;">
+      <strong>Cairns & Beaches</strong>
+    </div>
+  </div>
+</header>
+
+<!-- Countdown & Community Info -->
+<section class="countdown-section" id="countdown">
+  <div class="countdown-inner">
+    <div class="countdown-left">
+      <div class="countdown-palm"><img src="https://api.iconify.design/lucide/palmtree.svg?color=%23D4A017" alt="Palm tree" style="width:28px;height:28px;"></div>
+      <div>
+        <h3 class="countdown-heading">Until the lights come on</h3>
+        <div class="countdown-grid">
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cd-days">--</div>
+            <div class="countdown-label">Days</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cd-hours">--</div>
+            <div class="countdown-label">Hours</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cd-mins">--</div>
+            <div class="countdown-label">Minutes</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cd-secs">--</div>
+            <div class="countdown-label">Seconds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="countdown-divider"></div>
+    <div class="countdown-right-text">
+      <h3>Get ready for Cairns & Beaches Christmas Lights Trail 2026!</h3>
+      <p>It's time to explore, discover and celebrate the amazing homes in our community.</p>
+    </div>
+    <div class="countdown-decoration"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg></div>
+  </div>
+</section>
+
+<!-- Explore The Trail (Map) -->
+<section class="map-section" id="trail">
+  <div class="map-section-inner">
+    <div class="map-layout">
+      <div class="map-info">
+        <p class="eyebrow">Explore</p>
+        <h2>The Trail</h2>
+        <p>Discover beautifully decorated homes across Cairns & Beaches. Use the map to plan your route, find participating homes and cast your vote!</p>
+        <a href="#faq" class="btn-outline-dark">View FAQs →</a>
+      </div>
+      <div class="map-container">
+        <div id="trail-map" role="application" aria-label="Interactive map of participating homes on the Christmas Lights Trail"></div>
+      </div>
+      <div class="map-sidebar">
+        <div class="search-box">
+          <input type="text" placeholder="Search suburb or address..." id="map-search">
+        </div>
+        <div>
+          <p class="filter-label">Filter by suburb</p>
+          <div class="filter-group">
+            <select id="suburb-filter">
+              <option value="">All Suburbs</option>
+              <option value="Edge Hill">Edge Hill</option>
+              <option value="Redlynch">Redlynch</option>
+              <option value="Trinity Beach">Trinity Beach</option>
+              <option value="Clifton Beach">Clifton Beach</option>
+              <option value="Manoora">Manoora</option>
+              <option value="Whitfield">Whitfield</option>
+              <option value="Manunda">Manunda</option>
+              <option value="Yorkeys Knob">Yorkeys Knob</option>
+              <option value="Kewarra Beach">Kewarra Beach</option>
+              <option value="Bayview Heights">Bayview Heights</option>
+            </select>
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <label class="checkbox-item">
+            <input type="checkbox" checked> <svg width="14" height="14" viewBox="0 0 24 24" fill="#27AE60" stroke="#27AE60" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Open tonight
+            <span class="checkbox-count">28</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox"> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Voting open
+            <span class="checkbox-count">42</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox"> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Featured homes
+            <span class="checkbox-count">12</span>
+          </label>
+        </div>
+        <p class="map-count"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> <strong>63</strong> homes on the trail</p>
+        <button class="btn-navy" onclick="document.getElementById('trail-map').scrollIntoView({behavior:'smooth'})">View Map →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Homes -->
+<section class="featured-section" id="featured">
+  <div class="featured-inner">
+    <div class="featured-header">
+      <p class="eyebrow">Featured</p>
+      <h2>Homes on the Trail</h2>
+      <p>Take a sneak peek at some of the amazing homes lighting up our community.</p>
+      <a href="#trail" class="btn-outline-light">View All Homes →</a>
+    </div>
+    <div class="featured-carousel">
+      <button class="carousel-btn" onclick="scrollFeatured(-1)" aria-label="Previous">‹</button>
+      <div class="featured-grid" id="featured-grid">
+        <article class="featured-card">
+          <div style="position:relative;">
+            <img class="featured-card-img" src="https://v3b.fal.media/files/b/0aaa78fb/mZPSb21s6IisRfXMBJ02S_vNhJpaSq.png" alt="Modern beach house at Trinity Beach decorated with warm golden Christmas lights">
+            <span class="featured-tag">Featured</span>
+          </div>
+          <div class="featured-card-body">
+            <h3 class="featured-card-suburb">Trinity Beach</h3>
+            <div class="featured-card-meta">
+              <span class="featured-card-location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Trinity Beach</span>
+              <span class="featured-card-votes"><svg width="12" height="12" viewBox="0 0 24 24" fill="#D4A017" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 124 votes</span>
+            </div>
+          </div>
+        </article>
+        <article class="featured-card">
+          <div style="position:relative;">
+            <img class="featured-card-img" src="https://v3b.fal.media/files/b/0aaa78fb/r_sRW3hly529n4MjRSaQI_uWAP5Cnb.png" alt="Luxury tropical home at Palm Cove wrapped in warm white Christmas fairy lights">
+            <span class="featured-tag">Featured</span>
+          </div>
+          <div class="featured-card-body">
+            <h3 class="featured-card-suburb">Palm Cove</h3>
+            <div class="featured-card-meta">
+              <span class="featured-card-location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Palm Cove</span>
+              <span class="featured-card-votes"><svg width="12" height="12" viewBox="0 0 24 24" fill="#D4A017" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 98 votes</span>
+            </div>
+          </div>
+        </article>
+        <article class="featured-card">
+          <div style="position:relative;">
+            <img class="featured-card-img" src="https://v3b.fal.media/files/b/0aaa78fb/sU4ICTqtpCTxmLr0zUGMs_5ll4ih75.png" alt="Charming Queenslander cottage at Yorkeys Knob with colorful Christmas lights and reindeer display">
+            <span class="featured-tag">Featured</span>
+          </div>
+          <div class="featured-card-body">
+            <h3 class="featured-card-suburb">Yorkeys Knob</h3>
+            <div class="featured-card-meta">
+              <span class="featured-card-location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Yorkeys Knob</span>
+              <span class="featured-card-votes"><svg width="12" height="12" viewBox="0 0 24 24" fill="#D4A017" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 76 votes</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <button class="carousel-btn" onclick="scrollFeatured(1)" aria-label="Next">›</button>
+    </div>
+  </div>
+</section>
+
+<!-- Split Action Banners -->
+<section class="split-banners" id="vote">
+  <div class="split-panel">
+    <div class="split-panel-bg">
+      <img src="https://v3b.fal.media/files/b/0aaa78f9/KcWtgB_Wv4aYJOgHT_Vdz_56hdM6yn.png" alt="Hand holding smartphone taking a photo of beautiful Christmas lights">
+    </div>
+    <div class="split-panel-overlay"></div>
+    <div class="split-panel-content">
+      <div class="split-panel-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+      <h3>Vote for Your Favourite</h3>
+      <p>Have a favourite display? Show your support and help crown our People's Choice winner!</p>
+      <a href="#featured" class="btn-yellow">Cast Your Vote →</a>
+    </div>
+  </div>
+  <div class="split-panel" id="register">
+    <div class="split-panel-bg">
+      <img src="https://v3b.fal.media/files/b/0aaa78f9/exWNHXoa2ZkkG7W2R6gIG_sU2ApnOz.png" alt="Beautiful coastal Queenslander home covered in warm white Christmas lights at night">
+    </div>
+    <div class="split-panel-overlay"></div>
+    <div class="split-panel-content">
+      <div class="split-panel-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <h3>Register Your Home</h3>
+      <p>Want to be part of the trail? It's easy to register your home and share your Christmas spirit with the community.</p>
+      <a href="#register-form" class="btn-outline-white">Register Now →</a>
+    </div>
+  </div>
+</section>
+
+<!-- Tropical Summer Christmas Showcase -->
+<section class="showcase-section">
+  <div class="showcase-bg">
+    <img src="6d3ef8d2d9a37532-End_Picture.png" alt="Tropical beach sunset in Cairns with palm trees and string lights">
+  </div>
+  <div class="showcase-overlay"></div>
+  <div class="showcase-inner">
+    <div class="showcase-left">
+      <p class="eyebrow">The Unique Beauty Of</p>
+      <h2>Cairns Summer Christmas</h2>
+      <p>Warm nights, tropical showers, outdoor entertaining, palm trees and Christmas lights, it's what makes our Christmas truly special.</p>
+      <a href="#trail" class="btn-outline-white">Discover Cairns →</a>
+    </div>
+    <div class="showcase-features">
+      <div class="showcase-feature">
+        <div class="showcase-feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </div>
+        <span class="showcase-feature-label">Warm evenings</span>
+      </div>
+      <div class="showcase-feature">
+        <div class="showcase-feature-icon">
+          <img src="https://api.iconify.design/lucide/palmtree.svg?color=%23D4A017" alt="Palm tree" style="width:28px;height:28px;">
+        </div>
+        <span class="showcase-feature-label">Tropical scenery</span>
+      </div>
+      <div class="showcase-feature">
+        <div class="showcase-feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 1.3 0 1.9-.5 2.5-1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 1.3 0 1.9-.5 2.5-1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 1.3 0 1.9-.5 2.5-1"/></svg>
+        </div>
+        <span class="showcase-feature-label">Ocean breezes</span>
+      </div>
+      <div class="showcase-feature">
+        <div class="showcase-feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <span class="showcase-feature-label">Community spirit</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ & Wet Weather Policy & Community Badge -->
+<section class="faq-section" id="faq">
+  <div class="faq-inner">
+    <div>
+      <div class="faq-col-header">
+        <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A1628" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <h3>FAQs</h3>
+      </div>
+      <div class="faq-item open">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          <h4>How do I vote for my favourite display?</h4>
+          <span class="faq-chevron">⌄</span>
+        </button>
+        <div class="faq-answer">
+          <p>Each visitor gets one vote for the People's Choice award. Voting opens 1 December and closes at 11:59pm on 20 December. Simply browse the featured homes above and click the vote button on your favourite.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          <h4>How do I register my home?</h4>
+          <span class="faq-chevron">⌄</span>
+        </button>
+        <div class="faq-answer">
+          <p>Click the "Register Your Home" button and fill in the form. Entries close 24 November 2026. It's completely free, and you don't need to be a Ray White client.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          <h4>What happens if it rains?</h4>
+          <span class="faq-chevron">⌄</span>
+        </button>
+        <div class="faq-answer">
+          <p>Most displays will still run in light rain. During heavy storms, some homes may switch off for safety. Check this page or our Facebook page for updates.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          <h4>Is there a map I can use?</h4>
+          <span class="faq-chevron">⌄</span>
+        </button>
+        <div class="faq-answer">
+          <p>Yes! Scroll up to the "Explore The Trail" section for our interactive map. You can search by suburb, filter by what's open tonight, and get directions to each display.</p>
+        </div>
+      </div>
+    </div>
+    <div class="policy-col">
+      <div class="faq-col-header">
+        <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A1628" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><line x1="16" y1="16" x2="16" y2="22"/><line x1="8" y1="16" x2="8" y2="22"/><line x1="12" y1="18" x2="12" y2="24"/></svg></span>
+        <h3>Wet Weather Policy</h3>
+      </div>
+      <p>In the event of wet weather, the trail will remain open where possible. If we experience severe weather, locations may be subject to change. Please check back for updates.</p>
+      <p>We recommend checking this page or the Ray White Cairns Beaches Facebook page before heading out on rainy evenings.</p>
+      <a href="#terms" class="policy-link">View Full Details →</a>
+    </div>
+    <div class="community-col">
+      <div class="community-text-group">
+        <div class="community-script">Supporting our<br>local community</div>
+        <div class="community-heart"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+      </div>
+      <div class="community-logo-block">
+        <img src="b2dd786b5beb80bc-RW_Logo.jpg" alt="Ray White" style="height:56px;width:56px;border-radius:8px;object-fit:cover;">
+        <span class="community-logo-text">Cairns & Beaches</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer" id="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="b2dd786b5beb80bc-RW_Logo.jpg" alt="Ray White" style="height:56px;width:56px;border-radius:8px;object-fit:cover;">
+      <span class="footer-brand-text">Cairns & Beaches</span>
+    </div>
+    <ul class="footer-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#trail">Explore the Trail</a></li>
+      <li><a href="#vote">Vote</a></li>
+      <li><a href="#register">Register</a></li>
+      <li><a href="#faq">FAQs</a></li>
+      <li><a href="#footer">Contact</a></li>
+    </ul>
+    <div class="footer-social">
+      <a href="https://www.facebook.com/raywhitecairnsbeaches" target="_blank" rel="noopener" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </a>
+      <a href="https://www.instagram.com/raywhitecairnsbeaches" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── Nav scroll effect ──
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('main-nav');
+  if (window.scrollY > 80) {
+    nav.classList.add('scrolled');
+  } else {
+    nav.classList.remove('scrolled');
+  }
+});
+
+// ── Entry data ──
+const entries = [
+  { id: 1, suburb: 'Edge Hill', lat: -16.8985, lng: 145.7385, desc: 'A wraparound verandah lit corner to corner, synced to a looping playlist.', votes: 42 },
+  { id: 2, suburb: 'Redlynch', lat: -16.9100, lng: 145.6950, desc: 'Rainforest-backdrop display with a projection show on the garage door.', votes: 37 },
+  { id: 3, suburb: 'Trinity Beach', lat: -16.7850, lng: 145.6950, desc: 'Beachfront yard with a full nativity scene and a walk-through light tunnel.', votes: 55 },
+  { id: 4, suburb: 'Clifton Beach', lat: -16.7650, lng: 145.6700, desc: 'A street-group entry, six houses running one coordinated theme.', votes: 63 },
+  { id: 5, suburb: 'Manoora', lat: -16.9150, lng: 145.7300, desc: 'First-time entrant with a hand-built sleigh and 3,000 LED icicle lights.', votes: 19 },
+  { id: 6, suburb: 'Whitfield', lat: -16.8850, lng: 145.7250, desc: 'A hillside home visible from the road below, lit in blue and gold.', votes: 28 },
+  { id: 7, suburb: 'Manunda', lat: -16.9200, lng: 145.7400, desc: 'Kid-run donation box on the fence line for the local food bank.', votes: 31 },
+  { id: 8, suburb: 'Yorkeys Knob', lat: -16.8000, lng: 145.7200, desc: 'Music-synced display best viewed from the footpath after 7pm.', votes: 46 },
+  { id: 9, suburb: 'Kewarra Beach', lat: -16.7750, lng: 145.6800, desc: 'Tropical theme with lit palms and a life-size lit reindeer pair.', votes: 24 },
+  { id: 10, suburb: 'Bayview Heights', lat: -16.9400, lng: 145.7100, desc: 'Returning three-time entrant, famous locally for the animated snow machine.', votes: 39 },
+];
+
+// ── Countdown (to 1 December 2026, voting opens) ──
+function updateCountdown() {
+  const target = new Date('2026-12-01T00:00:00+10:00');
+  const now = new Date();
+  const diff = target - now;
+  if (diff <= 0) {
+    document.querySelector('.countdown-heading').textContent = 'Voting closes in';
+    const closeTarget = new Date('2026-12-20T23:59:59+10:00');
+    const closeDiff = closeTarget - now;
+    if (closeDiff <= 0) {
+      document.querySelector('.countdown-heading').textContent = 'Voting has closed';
+      setCountdownValues(0);
+      return;
+    }
+    setCountdownValues(closeDiff);
+    return;
+  }
+  setCountdownValues(diff);
+}
+function setCountdownValues(diff) {
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-days').textContent = d;
+  document.getElementById('cd-hours').textContent = String(h).padStart(2, '0');
+  document.getElementById('cd-mins').textContent = String(m).padStart(2, '0');
+  document.getElementById('cd-secs').textContent = String(s).padStart(2, '0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// ── Map ──
+const map = L.map('trail-map', { scrollWheelZoom: false }).setView([-16.8600, 145.7100], 12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  maxZoom: 18,
+}).addTo(map);
+
+map.on('focus', () => map.scrollWheelZoom.enable());
+map.on('blur', () => map.scrollWheelZoom.disable());
+
+const markers = {};
+entries.forEach(e => {
+  const icon = L.divIcon({
+    className: 'custom-pin',
+    html: `<div style="background:#FFD700;color:#0A1628;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #0A1628;box-shadow:0 2px 6px rgba(0,0,0,0.3);"><span style="transform:rotate(45deg);font-weight:700;font-size:0.7rem;">★</span></div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
+  const marker = L.marker([e.lat, e.lng], { icon }).addTo(map);
+  marker.bindPopup(`<strong>Entry ${String(e.id).padStart(2, '0')} · ${e.suburb}</strong><br>${e.desc}`);
+  markers[e.id] = marker;
+});
+
+// ── Featured carousel scroll ──
+function scrollFeatured(direction) {
+  const grid = document.getElementById('featured-grid');
+  const cardWidth = grid.querySelector('.featured-card').offsetWidth + 16;
+  grid.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
+}
+
+// ── Suburb filter ──
+document.getElementById('suburb-filter').addEventListener('change', function() {
+  const suburb = this.value;
+  if (!suburb) {
+    map.setView([-16.8600, 145.7100], 12);
+    return;
+  }
+  const entry = entries.find(e => e.suburb === suburb);
+  if (entry) {
+    map.setView([entry.lat, entry.lng], 14);
+    markers[entry.id].openPopup();
+  }
+});
+
+// ── Search ──
+document.getElementById('map-search').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  if (q.length < 2) return;
+  const match = entries.find(e => e.suburb.toLowerCase().includes(q) || e.desc.toLowerCase().includes(q));
+  if (match) {
+    map.setView([match.lat, match.lng], 14);
+    markers[match.id].openPopup();
+  }
+});
+</script>
+
+</body>
+</html>
